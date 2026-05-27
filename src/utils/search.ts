@@ -14,13 +14,15 @@ const fuseOptions: IFuseOptions<Question> = {
   includeScore: true,
 };
 
+let fuseSource: Question[] | null = null;
 let fuseInstance: Fuse<Question> | null = null;
 
 export function getFuse(questions: Question[]): Fuse<Question> {
-  if (!fuseInstance || fuseInstance.getIndex().size() !== questions.length) {
+  if (fuseSource !== questions) {
+    fuseSource = questions;
     fuseInstance = new Fuse(questions, fuseOptions);
   }
-  return fuseInstance;
+  return fuseInstance!;
 }
 
 export function searchQuestions(questions: Question[], keyword: string): Question[] {
