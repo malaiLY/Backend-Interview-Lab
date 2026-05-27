@@ -21,6 +21,7 @@ export default function ReviewCards() {
   );
   const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   // round=0 是初始态，懒初始化已处理；round>0 时重建队列
   useEffect(() => {
@@ -36,12 +37,14 @@ export default function ReviewCards() {
 
   const handleSelect = useCallback(
     (status: StudyStatus) => {
-      if (!current) return;
+      if (!current || isAdvancing) return;
+      setIsAdvancing(true);
       markQuestionStatus(current.id, status);
       setShowAnswer(false);
       setIndex((i) => i + 1);
+      requestAnimationFrame(() => setIsAdvancing(false));
     },
-    [current, markQuestionStatus],
+    [current, markQuestionStatus, isAdvancing],
   );
 
   const handleRestart = () => {
@@ -178,7 +181,7 @@ export default function ReviewCards() {
       </div>
 
       {/* 标记按钮 */}
-      <StatusButtons current={status} onSelect={handleSelect} />
+      <StatusButtons current={status} onSelect={handleSelect} disabled={isAdvancing} />
     </div>
   );
 }

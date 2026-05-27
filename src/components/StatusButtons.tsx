@@ -22,9 +22,10 @@ const BUTTONS: ButtonDef[] = [
 interface Props {
   current: StudyStatus;
   onSelect: (status: StudyStatus) => void;
+  disabled?: boolean;
 }
 
-export default function StatusButtons({ current, onSelect }: Props) {
+export default function StatusButtons({ current, onSelect, disabled }: Props) {
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-500 mr-1">我的掌握：</span>
@@ -34,10 +35,12 @@ export default function StatusButtons({ current, onSelect }: Props) {
           <button
             key={btn.status}
             onClick={() => onSelect(btn.status)}
+            disabled={disabled}
             className={`
               px-4 py-2 rounded-lg border text-sm font-medium transition-all
               ${isActive ? btn.active : btn.base}
               ${isActive ? 'shadow-sm scale-105' : 'hover:shadow-sm'}
+              ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >
             {btn.icon} {btn.label}

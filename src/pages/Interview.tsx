@@ -77,6 +77,7 @@ export default function Interview() {
   const [startTime, setStartTime] = useState(0);
   const [history, setHistory] = useState<InterviewRecord[]>(loadInterviewHistory);
   const [error, setError] = useState('');
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   // 当前题
   const current: Question | undefined = queue[index];
@@ -104,7 +105,8 @@ export default function Interview() {
 
   // 自评
   const handleAssess = (assessment: Assessment) => {
-    if (!current) return;
+    if (!current || isAdvancing) return;
+    setIsAdvancing(true);
 
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
     const newAnswer = { assessment, timeSpent: elapsed };
@@ -132,6 +134,7 @@ export default function Interview() {
       setShowAnswer(false);
       setStartTime(Date.now());
     }
+    requestAnimationFrame(() => setIsAdvancing(false));
   };
 
   // ==================== 配置阶段 ====================

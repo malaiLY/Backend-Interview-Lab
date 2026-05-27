@@ -12,7 +12,8 @@ export interface InterviewRecord {
 
 export function loadInterviewHistory(): InterviewRecord[] {
   try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
+    return Array.isArray(raw) ? raw : [];
   } catch {
     return [];
   }
