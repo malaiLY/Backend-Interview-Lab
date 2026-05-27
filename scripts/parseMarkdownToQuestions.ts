@@ -15,6 +15,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -227,6 +228,15 @@ function parseMarkdown(content: string): RawQuestion[] {
 
 // ==================== 文件名 → 模块 ====================
 
+function createQuestionId(module: Module, title: string): string {
+  const hash = crypto
+    .createHash('sha1')
+    .update(`${module}:${title}`)
+    .digest('hex')
+    .slice(0, 8);
+  return `${module.toLowerCase()}-${hash}`;
+}
+
 function resolveModule(filename: string): Module {
   const base = filename.replace(/\.md$/i, '');
   for (const [prefix, mod] of Object.entries(FILE_MODULE_MAP)) {
@@ -245,14 +255,13 @@ function main() {
     process.exit(1);
   }
 
-  const files = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith('.md'));
+  const files = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith('.md')).sort();
   if (files.length === 0) {
     console.error('docs/ 目录下没有 .md 文件');
     process.exit(1);
   }
 
   const allQuestions: object[] = [];
-  const counter: Record<string, number> = {};
 
   for (const file of files) {
     const module = resolveModule(file);
@@ -261,9 +270,7 @@ function main() {
     const parsed = parseMarkdown(content);
 
     for (const q of parsed) {
-      counter[module] = (counter[module] ?? 0) + 1;
-      const num = String(counter[module]).padStart(3, '0');
-      const id = `${module.toLowerCase()}-${num}`;
+      const id = createQuestionId(module, q.title);
 
       allQuestions.push({
         id,
