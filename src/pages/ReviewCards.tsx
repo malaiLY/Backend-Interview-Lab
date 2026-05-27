@@ -51,6 +51,7 @@ export default function ReviewCards() {
     setRound((r) => r + 1);
     setIndex(0);
     setShowAnswer(false);
+    setIsAdvancing(false);
   };
 
   // ===== 空状态 =====

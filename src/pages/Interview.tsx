@@ -323,7 +323,8 @@ export default function Interview() {
             <button
               key={a}
               onClick={() => handleAssess(a)}
-              className={`px-5 py-2.5 rounded-lg border text-sm font-medium transition-colors ${ASSESS_STYLE[a]}`}
+              disabled={isAdvancing}
+              className={`px-5 py-2.5 rounded-lg border text-sm font-medium transition-colors ${ASSESS_STYLE[a]} ${isAdvancing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {ASSESS_LABEL[a]}
             </button>
