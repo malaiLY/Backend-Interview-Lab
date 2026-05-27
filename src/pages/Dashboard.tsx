@@ -41,7 +41,7 @@ export default function Dashboard() {
         name: m.module,
         rate: Math.round(m.rate * 100),
         total: m.total,
-        known: m.known,
+        known: m.known + m.mastered,
       })),
     [stat.byModule],
   );

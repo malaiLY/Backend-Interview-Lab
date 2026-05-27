@@ -116,8 +116,8 @@ export default function ReviewCards() {
 
       {/* 进度条 */}
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-500 font-medium tabular-nums w-14">
-          {index + 1} / {queue.length}
+        <span className="text-sm text-gray-500 font-medium tabular-nums w-20">
+          已完成 {index}/{queue.length}
         </span>
         <div className="flex-1 bg-gray-200 rounded-full h-1.5">
           <div

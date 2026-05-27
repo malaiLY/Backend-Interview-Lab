@@ -259,7 +259,7 @@ export default function Interview() {
       <div className="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-800">模拟面试</h1>
-          <span className="text-sm text-gray-400">{index + 1} / {queue.length}</span>
+          <span className="text-sm text-gray-400">已完成 {index}/{queue.length}</span>
         </div>
 
         {/* 进度条 */}

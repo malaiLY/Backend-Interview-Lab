@@ -41,7 +41,7 @@ const FILE_MODULE_MAP: Record<string, Module> = {
 
 // ==================== 关键词 → 标签 ====================
 
-const TAG_RULES: [RegExp, string[]][] = [
+const TAG_RULES: [RegExp, string[], Module[]?][] = [
   [/HashMap|ConcurrentHashMap/, ['集合', 'HashMap']],
   [/synchronized/,              ['并发', '锁']],
   [/ReentrantLock|Lock/,        ['并发', '锁']],
@@ -57,7 +57,7 @@ const TAG_RULES: [RegExp, string[]][] = [
   [/SpringBoot|自动装配|Starter/, ['SpringBoot']],
   [/MVCC/,                      ['MVCC', '事务']],
   [/索引|B\+树|Index/,          ['索引']],
-  [/隔离级别|隔离性/,            ['事务', '隔离级别']],
+  [/隔离级别|隔离性/,            ['事务', '隔离级别'], ['MySQL']],
   [/Redis/,                     ['Redis']],
   [/缓存|Cache/,                ['缓存']],
   [/穿透|击穿|雪崩/,            ['缓存']],
@@ -88,7 +88,8 @@ function extractTags(title: string, answer: string, module: Module): string[] {
   const text = title + ' ' + answer;
   const tags = new Set<string>();
   tags.add(module);
-  for (const [re, tagList] of TAG_RULES) {
+  for (const [re, tagList, allowedModules] of TAG_RULES) {
+    if (allowedModules && !allowedModules.includes(module)) continue;
     if (re.test(text)) {
       tagList.forEach((t) => tags.add(t));
     }
@@ -242,9 +243,10 @@ function resolveModule(filename: string): Module {
   for (const [prefix, mod] of Object.entries(FILE_MODULE_MAP)) {
     if (base.startsWith(prefix)) return mod;
   }
-  // fallback: 取第一个 - 前的部分
   const key = base.split('-')[0]!;
-  return (FILE_MODULE_MAP[key] ?? 'JavaSE') as Module;
+  const mod = FILE_MODULE_MAP[key];
+  if (!mod) throw new Error(`无法识别文件名对应的模块: ${filename}`);
+  return mod;
 }
 
 // ==================== 主流程 ====================
