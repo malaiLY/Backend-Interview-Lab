@@ -39,10 +39,10 @@ export function calcModuleStat(
 
   for (const q of qs) {
     const s = (progressMap[q.id]?.status ?? 'new') as StudyStatus;
-    if (s === 'new')     { newCount++; unknown++; continue; }
-    if (s === 'mastered') { mastered++; known++; continue; }
-    if (s === 'known')   { known++; continue; }
-    if (s === 'vague')   { vague++; continue; }
+    if (s === 'new')      { newCount++; continue; }
+    if (s === 'mastered') { mastered++; continue; }
+    if (s === 'known')    { known++; continue; }
+    if (s === 'vague')    { vague++; continue; }
     unknown++;
   }
 
@@ -54,7 +54,7 @@ export function calcModuleStat(
     unknown,
     newCount,
     mastered,
-    rate: qs.length > 0 ? known / qs.length : 0,
+    rate: qs.length > 0 ? (known + mastered) / qs.length : 0,
   };
 }
 

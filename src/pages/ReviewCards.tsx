@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import questionsData from '@/data/questions.json';
@@ -16,15 +16,17 @@ export default function ReviewCards() {
   const getQuestionStatus = useStudyStore((s) => s.getQuestionStatus);
 
   const [round, setRound] = useState(0);
+  const [queue, setQueue] = useState<Question[]>([]);
   const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
-  const queue = useMemo(
-    () => buildReviewQueue(questions, progressMap, QUEUE_SIZE),
-    // round 变化时重建队列
+  // 队列只在 round 变化时重建，不在每次标记后重排
+  useEffect(() => {
+    setQueue(buildReviewQueue(questions, progressMap, QUEUE_SIZE));
+    setIndex(0);
+    setShowAnswer(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [progressMap, round],
-  );
+  }, [round]);
 
   const isFinished = index >= queue.length;
   const current: Question | undefined = queue[index];

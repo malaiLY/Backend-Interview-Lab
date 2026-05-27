@@ -27,8 +27,8 @@ export function buildReviewQueue(
     const status = progressMap[q.id]?.status ?? 'new';
     if (status === 'unknown') { unknown.push(q); continue; }
     if (status === 'vague')  { vague.push(q);  continue; }
-    if (status === 'new')    { fresh.push(q);  continue; }
-    if (q.difficulty === HIGH_DIFFICULTY) { hard.push(q); }
+    if (q.difficulty === HIGH_DIFFICULTY && status !== 'mastered') { hard.push(q); continue; }
+    if (status === 'new')    { fresh.push(q); }
   }
 
   shuffle(unknown);

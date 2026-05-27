@@ -6,6 +6,7 @@ import questionsData from '@/data/questions.json';
 import type { Question, Module, Difficulty, StudyStatus } from '@/types/question';
 import { MODULES } from '@/types/question';
 import { useStudyStore } from '@/store/useStudyStore';
+import { loadInterviewHistory, saveInterviewHistory, type InterviewRecord } from '@/utils/interviewHistory';
 
 const questions = questionsData as Question[];
 
@@ -46,8 +47,6 @@ const DIFFICULTIES: { value: Difficulty | ''; label: string }[] = [
 
 const COUNTS = [5, 10, 20];
 
-const HISTORY_KEY = 'interview-lab-history';
-
 // ==================== 工具函数 ====================
 
 function shufflePick<T>(arr: T[], count: number): T[] {
@@ -57,14 +56,6 @@ function shufflePick<T>(arr: T[], count: number): T[] {
     [copy[i]!, copy[j]!] = [copy[j]!, copy[i]!];
   }
   return copy.slice(0, count);
-}
-
-function loadHistory(): { id: string; date: string; total: number; known: number; vague: number; unknown: number }[] {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
-  } catch {
-    return [];
-  }
 }
 
 // ==================== 页面 ====================
@@ -84,7 +75,7 @@ export default function Interview() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [startTime, setStartTime] = useState(0);
-  const [history, setHistory] = useState(loadHistory());
+  const [history, setHistory] = useState<InterviewRecord[]>(loadInterviewHistory);
 
   // 当前题
   const current: Question | undefined = queue[index];
@@ -134,7 +125,7 @@ export default function Interview() {
   // 完成后保存历史
   useEffect(() => {
     if (phase !== 'report') return;
-    const record = {
+    const record: InterviewRecord = {
       id: Date.now().toString(),
       date: new Date().toLocaleDateString('zh-CN'),
       total: queue.length,
@@ -142,9 +133,8 @@ export default function Interview() {
       vague:   Object.values(answers).filter((a) => a.assessment === 'vague').length,
       unknown: Object.values(answers).filter((a) => a.assessment === 'unknown').length,
     };
-    const updated = [record, ...history].slice(0, 20);
+    const updated = saveInterviewHistory(record);
     setHistory(updated);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
