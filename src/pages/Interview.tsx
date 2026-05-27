@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link } from 'react-router-dom';
@@ -76,6 +76,7 @@ export default function Interview() {
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [startTime, setStartTime] = useState(0);
   const [history, setHistory] = useState<InterviewRecord[]>(loadInterviewHistory);
+  const [error, setError] = useState('');
 
   // 当前题
   const current: Question | undefined = queue[index];
@@ -87,7 +88,11 @@ export default function Interview() {
     if (selectedDiff)   pool = pool.filter((q) => q.difficulty === selectedDiff);
 
     const picked = shufflePick(pool, count);
-    if (picked.length === 0) return;
+    if (picked.length === 0) {
+      setError('当前筛选条件下没有题目，请换一个模块或难度');
+      return;
+    }
+    setError('');
 
     setQueue(picked);
     setIndex(0);
@@ -102,41 +107,32 @@ export default function Interview() {
     if (!current) return;
 
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
-
-    // 保存答案
-    setAnswers((prev) => ({
-      ...prev,
-      [current.id]: { assessment, timeSpent: elapsed },
-    }));
+    const newAnswer = { assessment, timeSpent: elapsed };
 
     // 同步到学习状态
     markQuestionStatus(current.id, ASSESS_MAP[assessment]);
 
-    // 下一题或结束
+    // 最后一题 → 生成报告 + 保存历史
     if (index + 1 >= queue.length) {
+      const finalAnswers = { ...answers, [current.id]: newAnswer };
+      const record: InterviewRecord = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString('zh-CN'),
+        total: queue.length,
+        known:   Object.values(finalAnswers).filter((a) => a.assessment === 'known').length,
+        vague:   Object.values(finalAnswers).filter((a) => a.assessment === 'vague').length,
+        unknown: Object.values(finalAnswers).filter((a) => a.assessment === 'unknown').length,
+      };
+      setAnswers(finalAnswers);
+      setHistory(saveInterviewHistory(record));
       setPhase('report');
     } else {
+      setAnswers((prev) => ({ ...prev, [current.id]: newAnswer }));
       setIndex((i) => i + 1);
       setShowAnswer(false);
       setStartTime(Date.now());
     }
   };
-
-  // 完成后保存历史
-  useEffect(() => {
-    if (phase !== 'report') return;
-    const record: InterviewRecord = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleDateString('zh-CN'),
-      total: queue.length,
-      known:   Object.values(answers).filter((a) => a.assessment === 'known').length,
-      vague:   Object.values(answers).filter((a) => a.assessment === 'vague').length,
-      unknown: Object.values(answers).filter((a) => a.assessment === 'unknown').length,
-    };
-    const updated = saveInterviewHistory(record);
-    setHistory(updated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
 
   // ==================== 配置阶段 ====================
 
@@ -216,6 +212,9 @@ export default function Interview() {
           >
             开始面试
           </button>
+          {error && (
+            <p className="text-sm text-red-600 text-center">{error}</p>
+          )}
         </div>
 
         {/* 历史记录 */}

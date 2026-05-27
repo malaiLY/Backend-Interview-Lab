@@ -23,6 +23,7 @@ const STATUSES: { value: StudyStatus; label: string }[] = [
 ];
 
 export default function QuestionBank() {
+  const progressMap = useStudyStore((s) => s.progressMap);
   const getQuestionStatus = useStudyStore((s) => s.getQuestionStatus);
 
   const [filters, setFilters] = useState<QuestionFilters>({
@@ -37,7 +38,7 @@ export default function QuestionBank() {
 
   const filtered = useMemo(
     () => filterQuestions(questions, filters, getQuestionStatus),
-    [filters, getQuestionStatus],
+    [filters, getQuestionStatus, progressMap],
   );
 
   return (

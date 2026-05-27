@@ -16,12 +16,15 @@ export default function ReviewCards() {
   const getQuestionStatus = useStudyStore((s) => s.getQuestionStatus);
 
   const [round, setRound] = useState(0);
-  const [queue, setQueue] = useState<Question[]>([]);
+  const [queue, setQueue] = useState<Question[]>(() =>
+    buildReviewQueue(questions, progressMap, QUEUE_SIZE),
+  );
   const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
-  // 队列只在 round 变化时重建，不在每次标记后重排
+  // round=0 是初始态，懒初始化已处理；round>0 时重建队列
   useEffect(() => {
+    if (round === 0) return;
     setQueue(buildReviewQueue(questions, progressMap, QUEUE_SIZE));
     setIndex(0);
     setShowAnswer(false);
