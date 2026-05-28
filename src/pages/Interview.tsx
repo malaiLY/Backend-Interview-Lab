@@ -61,7 +61,7 @@ function shufflePick<T>(arr: T[], count: number): T[] {
 // ==================== 页面 ====================
 
 export default function Interview() {
-  const markQuestionStatus = useStudyStore((s) => s.markQuestionStatus);
+  const recordReviewResult = useStudyStore((s) => s.recordReviewResult);
 
   // 配置
   const [selectedModule, setSelectedModule] = useState<Module | ''>('');
@@ -112,7 +112,7 @@ export default function Interview() {
     const newAnswer = { assessment, timeSpent: elapsed };
 
     // 同步到学习状态
-    markQuestionStatus(current.id, ASSESS_MAP[assessment]);
+    recordReviewResult(current.id, ASSESS_MAP[assessment]);
 
     // 最后一题 → 生成报告 + 保存历史
     if (index + 1 >= queue.length) {

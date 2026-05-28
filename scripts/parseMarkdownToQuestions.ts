@@ -129,6 +129,19 @@ function extractSummary(answer: string): string {
     if (clean.length > 60) return clean.slice(0, 60) + '...';
     return clean;
   }
+
+  // fallback: 答案以表格开头，取第一个数据行的第二列作为摘要
+  for (const line of answer.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || !trimmed.startsWith('|')) continue;
+    const cells = trimmed.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cells.length >= 2 && cells[0] !== '---' && !cells[0]!.includes('---')) {
+      const text = cells[1]!.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`(.+?)`/g, '$1');
+      if (text.length > 60) return text.slice(0, 60) + '...';
+      if (text) return text;
+    }
+  }
+
   return '';
 }
 
@@ -249,6 +262,67 @@ function resolveModule(filename: string): Module {
   return mod;
 }
 
+// ==================== 数据校验 ====================
+
+const VALID_MODULES = new Set(['JavaSE', 'JUC', 'JVM', 'Spring', 'MySQL', 'Redis', 'MQ', 'Network']);
+const VALID_DIFFICULTIES = new Set(['低', '中', '高']);
+
+function validate(questions: object[]): void {
+  const errors: string[] = [];
+  const idSet = new Set<string>();
+  const titleSet = new Set<string>();
+  const moduleCounts: Record<string, number> = {};
+
+  for (const obj of questions) {
+    const q = obj as Record<string, unknown>;
+    const id = q['id'] as string;
+    const title = q['title'] as string;
+    const module = q['module'] as string;
+    const difficulty = q['difficulty'] as string;
+    const answer = q['answer'] as string;
+    const summary = q['summary'] as string;
+    const tags = q['tags'] as string[];
+
+    // id 重复
+    if (idSet.has(id)) errors.push(`id 重复: ${id}`);
+    idSet.add(id);
+
+    // title 重复
+    if (titleSet.has(title)) errors.push(`title 重复: ${title}`);
+    titleSet.add(title);
+
+    // module 合法
+    if (!VALID_MODULES.has(module)) errors.push(`非法 module "${module}" in ${id}`);
+
+    // difficulty 合法
+    if (!VALID_DIFFICULTIES.has(difficulty)) errors.push(`非法 difficulty "${difficulty}" in ${id}`);
+
+    // answer/summary 非空
+    if (!answer) errors.push(`answer 为空: ${id}`);
+    if (!summary) errors.push(`summary 为空: ${id}`);
+
+    // tags 数量
+    if (tags.length > 5) errors.push(`tags 超过 5 个: ${id} (${tags.length})`);
+
+    // 统计
+    moduleCounts[module] = (moduleCounts[module] ?? 0) + 1;
+  }
+
+  // 输出统计
+  console.log('\n模块统计:');
+  for (const [mod, count] of Object.entries(moduleCounts).sort()) {
+    console.log(`  ${mod}: ${count}`);
+  }
+
+  if (errors.length > 0) {
+    console.error(`\n校验失败 (${errors.length} 个错误):`);
+    errors.forEach((e) => console.error(`  ✗ ${e}`));
+    process.exit(1);
+  }
+
+  console.log(`\n校验通过 ✓`);
+}
+
 // ==================== 主流程 ====================
 
 function main() {
@@ -289,6 +363,10 @@ function main() {
 
     console.log(`  ${file} -> [${module}] x ${parsed.length}`);
   }
+
+  // ==================== 数据校验 ====================
+
+  validate(allQuestions);
 
   const outDir = path.dirname(OUTPUT_FILE);
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });

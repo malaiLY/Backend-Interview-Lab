@@ -12,7 +12,7 @@ const QUEUE_SIZE = 20;
 
 export default function ReviewCards() {
   const progressMap = useStudyStore((s) => s.progressMap);
-  const markQuestionStatus = useStudyStore((s) => s.markQuestionStatus);
+  const recordReviewResult = useStudyStore((s) => s.recordReviewResult);
   const getQuestionStatus = useStudyStore((s) => s.getQuestionStatus);
 
   const [round, setRound] = useState(0);
@@ -39,12 +39,12 @@ export default function ReviewCards() {
     (status: StudyStatus) => {
       if (!current || isAdvancing) return;
       setIsAdvancing(true);
-      markQuestionStatus(current.id, status);
+      recordReviewResult(current.id, status);
       setShowAnswer(false);
       setIndex((i) => i + 1);
       requestAnimationFrame(() => setIsAdvancing(false));
     },
-    [current, markQuestionStatus, isAdvancing],
+    [current, recordReviewResult, isAdvancing],
   );
 
   const handleRestart = () => {

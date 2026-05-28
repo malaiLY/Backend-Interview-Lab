@@ -25,7 +25,7 @@ export default function QuestionDetail() {
   const question = useMemo(() => questions.find((q) => q.id === id), [id]);
 
   const getQuestionStatus = useStudyStore((s) => s.getQuestionStatus);
-  const markQuestionStatus = useStudyStore((s) => s.markQuestionStatus);
+  const setQuestionStatus = useStudyStore((s) => s.setQuestionStatus);
 
   const currentStatus = id ? getQuestionStatus(id) : 'new';
 
@@ -34,7 +34,7 @@ export default function QuestionDetail() {
 
   const handleSelect = (status: StudyStatus) => {
     if (!id || status === currentStatus) return;
-    markQuestionStatus(id, status);
+    setQuestionStatus(id, status);
     setFlash(true);
     setTimeout(() => setFlash(false), 600);
   };
