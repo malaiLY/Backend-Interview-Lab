@@ -60,12 +60,11 @@ export const useStudyStore = create<StudyState>()(
       markQuestionStatus: (questionId, status) =>
         set((state) => {
           const prev = state.progressMap[questionId] ?? defaultProgress();
-          if (prev.status === status) return state;
           return {
             progressMap: {
               ...state.progressMap,
               [questionId]: {
-                status,
+                status: prev.status === status ? prev.status : status,
                 reviewCount: prev.reviewCount + 1,
                 wrongCount:
                   prev.wrongCount + (status === 'unknown' || status === 'vague' ? 1 : 0),

@@ -161,7 +161,7 @@ function parseMarkdown(content: string): RawQuestion[] {
       const difficulty = extractDifficulty(rawTitle);
       const body: string[] = [];
       i++;
-      while (i < lines.length && !/^#{2,4}\s+\d+[.、]/.test(lines[i]!)) {
+      while (i < lines.length && !/^#{2,4}\s+\d+[.、]/.test(lines[i]!) && !/^\s{0,3}##\s+/.test(lines[i]!)) {
         if (lines[i]!.trim() === '---') { i++; break; }
         body.push(lines[i]!);
         i++;

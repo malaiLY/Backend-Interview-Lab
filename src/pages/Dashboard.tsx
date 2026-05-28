@@ -109,7 +109,7 @@ export default function Dashboard() {
                 />
               </div>
               <div className="flex items-center justify-between text-xs text-gray-400">
-                <span>{m.known} / {m.total} 题</span>
+                <span>{m.known + m.mastered} / {m.total} 题</span>
                 <span>{Math.round(m.rate * 100)}%</span>
               </div>
             </div>
