@@ -33,7 +33,7 @@ export default function QuestionDetail() {
   const [flash, setFlash] = useState(false);
 
   const handleSelect = (status: StudyStatus) => {
-    if (!id) return;
+    if (!id || status === currentStatus) return;
     markQuestionStatus(id, status);
     setFlash(true);
     setTimeout(() => setFlash(false), 600);

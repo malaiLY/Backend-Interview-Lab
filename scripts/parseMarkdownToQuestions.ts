@@ -80,7 +80,7 @@ const TAG_RULES: [RegExp, string[], Module[]?][] = [
   [/泛型|Generic/,              ['泛型']],
   [/Stream|Lambda/,             ['Stream']],
   [/设计模式|单例|工厂|策略/,    ['设计模式']],
-  [/SQL|查询优化|慢查询/,       ['SQL优化']],
+  [/查询优化|慢查询|SQL\s*(优化|执行|语句|索引)/, ['SQL优化'], ['MySQL']],
   [/锁|Lock|死锁/,              ['锁']],
 ];
 
